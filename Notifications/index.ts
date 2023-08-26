@@ -2,16 +2,29 @@ import { AzureFunction, Context, HttpRequest } from "@azure/functions"
 
 const httpTrigger: AzureFunction = async function (context: Context, req: HttpRequest): Promise<void> {
     context.log('HTTP trigger function processed a request.');
-    const name = (req.query.name || (req.body && req.body.name));
-    const responseMessage = name
-        ? "Hello, " + name + ". This HTTP triggered function executed successfully."
-        : "This HTTP triggered function executed successfully. Pass a name in the query string or in the request body for a personalized response.";
-
     context.res = {
-        // status: 200, /* Defaults to 200 */
-        body: responseMessage
+        body: [
+            {
+                messageId: '2',
+                notification: {
+                    body: 'Eid al-Adha is approaching! RSVP by Monday to reserve your spot for the community Eid prayer and festivities.',
+                    title: 'Eid al-Adha Celebrations',
+                },
+                sentTime: 1692617163289
+            },
+            {
+                messageId: '3',
+                notification: {
+                    body: 'Alhamdulillah, we have completed the renovation of the prayer area.',
+                    title: 'Reopening!',
+                },
+                sentTime: 1692789963289
+            },
+        ],
+        headers: {
+            'Content-Type': 'application/json'
+        }
     };
-
 };
 
 export default httpTrigger;
