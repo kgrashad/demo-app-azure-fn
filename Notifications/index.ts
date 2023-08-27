@@ -1,30 +1,29 @@
 import { AzureFunction, Context, HttpRequest } from "@azure/functions"
+import { CosmosClient, CosmosClientOptions } from "@azure/cosmos";
+
+const endpoint = process.env["CosmosEndpoint"];
+const key = process.env["CosmosKey"];
+const databaseId = process.env["DatabaseId"] ?? 'DemoApp';
+const containerId = process.env["NotificationsContainerId"] ?? 'Notifications';
+const client = new CosmosClient({ endpoint, key } as CosmosClientOptions);
+const container = client.database(databaseId).container(containerId);
 
 const httpTrigger: AzureFunction = async function (context: Context, req: HttpRequest): Promise<void> {
     context.log('HTTP trigger function processed a request.');
+
+    const querySpec = {
+        query: "SELECT * FROM c"
+    };
+
+    const { resources: items } = await container.items.query(querySpec).fetchAll();
+
     context.res = {
-        body: [
-            {
-                messageId: '2',
-                notification: {
-                    body: 'Eid al-Adha is approaching! RSVP by Monday to reserve your spot for the community Eid prayer and festivities.',
-                    title: 'Eid al-Adha Celebrations',
-                },
-                sentTime: 1692617163289
-            },
-            {
-                messageId: '3',
-                notification: {
-                    body: 'Alhamdulillah, we have completed the renovation of the prayer area.',
-                    title: 'Reopening!',
-                },
-                sentTime: 1692789963289
-            },
-        ],
+        body: items,
         headers: {
             'Content-Type': 'application/json'
         }
     };
 };
+
 
 export default httpTrigger;
