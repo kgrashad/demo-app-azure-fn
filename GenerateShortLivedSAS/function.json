@@ -15,5 +15,5 @@
       "name": "res"
     }
   ],
-  "scriptFile": "../dist/Notifications/index.js"
+  "scriptFile": "../dist/GenerateShortLivedSAS/index.js"
 }
