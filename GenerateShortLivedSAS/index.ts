@@ -13,6 +13,14 @@ const httpTrigger: AzureFunction = async function (context: Context, req: HttpRe
     const containerName = process.env["StorageContainerName"] ?? 'demo-app-files';
     const blobName = req.query.fileName;
 
+    if (!blobName) {
+        context.res = {
+            status: 400,
+            body: "fileName query parameter is required",
+        };
+        return;
+    }
+
     const containerClient = blobServiceClient.getContainerClient(containerName);
     const blobClient = containerClient.getBlobClient(blobName);
 
