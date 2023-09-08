@@ -1,20 +1,20 @@
-This is a simple Azure Function that includes a single endpoint to fetch notifications from a Cosmos DB.
+This is a simple Azure Function that includes a single endpoint to fetch notifications from a blob file.
 
 ### Getting Started
 
-#### Cosmos DB
-1. Create a Cosmos NoSQL DB following the official Azure guide.
-1. Create a Container inside it called 'Notifications'
-1. Add a few notification messages under Items
-1. Note down Cosmos DB endpoint and key as we will need them later
+#### Storage
+1. Create Azure Storage account following the official Azure guide.
+1. Create a private container
+1. Upload some static files to this container
+1. Copy the account key. You will need it later.
 
 #### Azure Function
 1. Create an Azure Function following the official Azure guide.
 1. Set the following settings in Azure Function Application settings found under Settings > Configurations
-    1. CosmosEndpoint: \<value copied from above\>
-    1. CosmosKey: \<value copied from above\>
-    1. DatabaseId: \<the name of the db you created>
-    1. NotificationsContainerId: \<the name of the notifications container\>
+    1. StorageAccount: \<value copied from above\>
+    1. StorageKey: \<value copied from above\>
+    1. StorageContainerName: \<the name of the container you created>
+    1. NotificationsFile: \<path to notifications file blob>
 
 #### Setting up development environment
 1. Clone this repository

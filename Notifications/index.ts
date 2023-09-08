@@ -22,6 +22,9 @@ const httpTrigger: AzureFunction = async function (context: Context, req: HttpRe
         context.res = {
             status: 200,
             body: fileContent,
+            headers: {
+                'Content-Type': 'application/json'
+            }
         };
     } catch (error) {
         context.res = {
