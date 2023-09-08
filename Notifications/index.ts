@@ -1,29 +1,47 @@
 import { AzureFunction, Context, HttpRequest } from "@azure/functions"
-import { CosmosClient, CosmosClientOptions } from "@azure/cosmos";
-
-const endpoint = process.env["CosmosEndpoint"];
-const key = process.env["CosmosKey"];
-const databaseId = process.env["DatabaseId"] ?? 'DemoApp';
-const containerId = process.env["NotificationsContainerId"] ?? 'Notifications';
-const client = new CosmosClient({ endpoint, key } as CosmosClientOptions);
-const container = client.database(databaseId).container(containerId);
+import { BlobServiceClient, StorageSharedKeyCredential } from "@azure/storage-blob";
 
 const httpTrigger: AzureFunction = async function (context: Context, req: HttpRequest): Promise<void> {
-    context.log('HTTP trigger function processed a request.');
 
-    const querySpec = {
-        query: "SELECT * FROM c"
-    };
+    try {
+        const account = process.env["StorageAccount"] ?? '';
+        const accountKey = process.env["StorageKey"] ?? '';
+        const sharedKeyCredential = new StorageSharedKeyCredential(account, accountKey);
+        const blobServiceClient = new BlobServiceClient(
+            `https://${account}.blob.core.windows.net`,
+            sharedKeyCredential
+        );
+        const containerName = process.env["StorageContainerName"] ?? 'demo-app-files';
+        const blobName = process.env["NotificationsFile"] ?? '';;
+        const containerClient = blobServiceClient.getContainerClient(containerName);
+        const blobClient = containerClient.getBlobClient(blobName);
 
-    const { resources: items } = await container.items.query(querySpec).fetchAll();
+        const downloadBlockBlobResponse = await blobClient.download(0);
+        const fileContent = (await streamToBuffer(downloadBlockBlobResponse.readableStreamBody!)).toString();
 
-    context.res = {
-        body: items,
-        headers: {
-            'Content-Type': 'application/json'
-        }
-    };
+        context.res = {
+            status: 200,
+            body: fileContent,
+        };
+    } catch (error) {
+        context.res = {
+            status: 500,
+            body: `Error reading blob: ${(error as Error).message}`,
+        };
+    }
 };
 
+async function streamToBuffer(readableStream: NodeJS.ReadableStream): Promise<Buffer> {
+    return new Promise((resolve, reject) => {
+        const chunks: any[] = [];
+        readableStream.on('data', (data) => {
+            chunks.push(data instanceof Buffer ? data : Buffer.from(data));
+        });
+        readableStream.on('end', () => {
+            resolve(Buffer.concat(chunks));
+        });
+        readableStream.on('error', reject);
+    });
+}
 
 export default httpTrigger;
